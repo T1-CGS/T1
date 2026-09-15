@@ -23,15 +23,15 @@ public class CargaInicial {
     public static final List<Usuario> usuarios = new ArrayList<>();
     public static final List<PedidoAquisicao> pedidos = new ArrayList<>();
 
-    private CargaInicial() {
-        // classe utilitaria, nao deve ser instanciada
-    }
-
     /**
      * Popula as listas em memoria com dados de exemplo.
-     * Deve ser chamado uma unica vez, no inicio da aplicacao.
+     * Deve ser chamado no inicio da aplicacao. Chamadas repetidas sao
+     * ignoradas, para nao duplicar os dados ja carregados.
      */
     public static void carregar() {
+        if (!departamentos.isEmpty()) {
+            return;
+        }
         carregarDepartamentos();
         carregarUsuarios();
         carregarPedidos();
@@ -45,6 +45,10 @@ public class CargaInicial {
         departamentos.add(new Departamento(5, "Manutencao", "MAN", new BigDecimal("20000.00")));
     }
 
+    /**
+     * Cada departamento recebe 1 administrador e 3 funcionarios,
+     * totalizando 15 funcionarios e 5 administradores.
+     */
     private static void carregarUsuarios() {
         Departamento ti = departamentos.get(0);
         Departamento fin = departamentos.get(1);
@@ -55,31 +59,36 @@ public class CargaInicial {
         usuarios.add(new Usuario(1, "Ana Ribeiro", Papel.ADMINISTRADOR, ti));
         usuarios.add(new Usuario(2, "Bruno Alves", Papel.FUNCIONARIO, ti));
         usuarios.add(new Usuario(3, "Carla Nunes", Papel.FUNCIONARIO, ti));
+        usuarios.add(new Usuario(4, "Daniel Moreira", Papel.FUNCIONARIO, ti));
 
-        usuarios.add(new Usuario(4, "Diego Souza", Papel.ADMINISTRADOR, fin));
-        usuarios.add(new Usuario(5, "Elisa Moraes", Papel.FUNCIONARIO, fin));
-        usuarios.add(new Usuario(6, "Fabio Lima", Papel.FUNCIONARIO, fin));
+        usuarios.add(new Usuario(5, "Diego Souza", Papel.ADMINISTRADOR, fin));
+        usuarios.add(new Usuario(6, "Elisa Moraes", Papel.FUNCIONARIO, fin));
+        usuarios.add(new Usuario(7, "Fabio Lima", Papel.FUNCIONARIO, fin));
+        usuarios.add(new Usuario(8, "Giovana Prado", Papel.FUNCIONARIO, fin));
 
-        usuarios.add(new Usuario(7, "Gabriela Rocha", Papel.ADMINISTRADOR, rh));
-        usuarios.add(new Usuario(8, "Hugo Martins", Papel.FUNCIONARIO, rh));
-        usuarios.add(new Usuario(9, "Isabela Costa", Papel.FUNCIONARIO, rh));
+        usuarios.add(new Usuario(9, "Helena Rocha", Papel.ADMINISTRADOR, rh));
+        usuarios.add(new Usuario(10, "Hugo Martins", Papel.FUNCIONARIO, rh));
+        usuarios.add(new Usuario(11, "Isabela Costa", Papel.FUNCIONARIO, rh));
+        usuarios.add(new Usuario(12, "Jonas Ferreira", Papel.FUNCIONARIO, rh));
 
-        usuarios.add(new Usuario(10, "Joao Pereira", Papel.ADMINISTRADOR, eng));
-        usuarios.add(new Usuario(11, "Karina Dias", Papel.FUNCIONARIO, eng));
-        usuarios.add(new Usuario(12, "Lucas Fernandes", Papel.FUNCIONARIO, eng));
+        usuarios.add(new Usuario(13, "Joao Pereira", Papel.ADMINISTRADOR, eng));
+        usuarios.add(new Usuario(14, "Karina Dias", Papel.FUNCIONARIO, eng));
+        usuarios.add(new Usuario(15, "Lucas Fernandes", Papel.FUNCIONARIO, eng));
+        usuarios.add(new Usuario(16, "Mariana Aguiar", Papel.FUNCIONARIO, eng));
 
-        usuarios.add(new Usuario(13, "Marina Teixeira", Papel.ADMINISTRADOR, man));
-        usuarios.add(new Usuario(14, "Nicolas Barros", Papel.FUNCIONARIO, man));
-        usuarios.add(new Usuario(15, "Olivia Cardoso", Papel.FUNCIONARIO, man));
+        usuarios.add(new Usuario(17, "Renata Barbosa", Papel.ADMINISTRADOR, man));
+        usuarios.add(new Usuario(18, "Nicolas Barros", Papel.FUNCIONARIO, man));
+        usuarios.add(new Usuario(19, "Olivia Cardoso", Papel.FUNCIONARIO, man));
+        usuarios.add(new Usuario(20, "Paulo Henrique Silva", Papel.FUNCIONARIO, man));
     }
 
     private static void carregarPedidos() {
         Usuario bruno = buscarUsuarioPorId(2);
-        Usuario elisa = buscarUsuarioPorId(5);
-        Usuario hugo = buscarUsuarioPorId(8);
-        Usuario lucas = buscarUsuarioPorId(12);
-        Usuario nicolas = buscarUsuarioPorId(14);
-        Usuario karina = buscarUsuarioPorId(11);
+        Usuario elisa = buscarUsuarioPorId(6);
+        Usuario hugo = buscarUsuarioPorId(10);
+        Usuario karina = buscarUsuarioPorId(14);
+        Usuario lucas = buscarUsuarioPorId(15);
+        Usuario nicolas = buscarUsuarioPorId(18);
 
         // Pedido 1 - Aberto (TI)
         PedidoAquisicao pedido1 = new PedidoAquisicao(1, bruno);
