@@ -1,14 +1,17 @@
 import dados.CargaInicial;
+import modelo.ItemPedido;
 import modelo.PedidoAquisicao;
 import modelo.Usuario;
 import servico.ResultadoOperacao;
 import servico.ServicoPedidos;
 import sessao.Sessao;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-//As opcoes "Registrar novo pedido", "Buscar pedidos" e "Ver estatisticas" dependem de outras issues (do Membro 2 e do 4) que ainda nao foram mergeadas, então aparecem no menu mas com aviso de "em desenvolvimento".
+//As opcoes "Buscar pedidos" e "Ver estatisticas" dependem das issues 7 e 8 (do Membro 4), que ainda nao foram mergeadas, então aparecem no menu mas com aviso de "em desenvolvimento".
 public class MenuPrincipal {
 
     private final Scanner entrada;
@@ -70,7 +73,7 @@ public class MenuPrincipal {
                 break;
 
             case 2:
-                avisarFuncionalidadePendente();
+                registrarNovoPedido();
                 break;
 
             case 3:
@@ -111,7 +114,7 @@ public class MenuPrincipal {
                 break;
 
             case 2:
-                avisarFuncionalidadePendente();
+                registrarNovoPedido();
                 break;
 
             case 3:
@@ -236,7 +239,59 @@ public class MenuPrincipal {
         System.out.println("Usuario alterado para: " + novoUsuario.getResumo());
     }
 
-    //EM DESENVOLVIMENTO!!! EM "MenuPrincipal" ESTÁ COMPLETO! MAS FALTA A ISSUE 4, 7 E 8 SEREM FINALIZADAS (registrar pedido, buscar pedidos, ver estatísticas). DEPOIS DE FEITOS TEM QUE TROCAR O NOME DO MÉTODO PARA A CHAMADA REAL.
+    //Registro de novo pedido (Issue 4). Coleta os itens um a um e delega a
+    //validacao do teto do departamento para o ServicoPedidos.
+    private void registrarNovoPedido() {
+        Usuario solicitante = sessao.getUsuarioAtual();
+
+        System.out.println("\nNovo pedido para " + solicitante.getNome()
+                + " - departamento " + solicitante.getDepartamento().getSigla());
+        System.out.println("Teto por pedido deste departamento: R$ "
+                + solicitante.getDepartamento().getLimitePorPedido());
+
+        List<ItemPedido> itens = new ArrayList<>();
+        boolean continuarAdicionando = true;
+
+        while (continuarAdicionando) {
+            System.out.print("\nDescricao do item (ENTER em branco para encerrar): ");
+            String descricao = entrada.nextLine().trim();
+
+            if (descricao.isEmpty()) {
+                continuarAdicionando = false;
+                continue;
+            }
+
+            System.out.print("Quantidade: ");
+            int quantidade = lerOpcao();
+
+            if (quantidade < 1) {
+                System.out.println("Quantidade invalida. Item descartado.");
+                continue;
+            }
+
+            System.out.print("Valor unitario: ");
+            BigDecimal valorUnitario = lerValor();
+
+            if (valorUnitario == null || valorUnitario.compareTo(BigDecimal.ZERO) <= 0) {
+                System.out.println("Valor invalido. Item descartado.");
+                continue;
+            }
+
+            itens.add(new ItemPedido(0, descricao, quantidade, "un", valorUnitario));
+            System.out.println("Item adicionado.");
+        }
+
+        if (itens.isEmpty()) {
+            System.out.println("\nNenhum item informado. Pedido cancelado.");
+            return;
+        }
+
+        ResultadoOperacao resultado = ServicoPedidos.registrarPedido(CargaInicial.pedidos, solicitante, itens);
+        exibirResultado(resultado);
+    }
+
+    //Ainda usado pelas opcoes de buscar pedidos e ver estatisticas (issues 7 e 8, do Membro 4).
+    //A issue 4 (registrar pedido) ja esta ligada a chamada real.
     private void avisarFuncionalidadePendente() {
         System.out.println("\nFuncionalidade ainda em desenvolvimento por outro membro do time.");
     }
@@ -274,6 +329,16 @@ public class MenuPrincipal {
             return Integer.parseInt(linha);
         } catch (NumberFormatException e) {
             return -1;
+        }
+    }
+
+    //Lê um valor monetario do usuário, aceitando virgula ou ponto. Retorna null se for invalido.
+    private BigDecimal lerValor() {
+        String linha = entrada.nextLine().trim().replace(",", ".");
+        try {
+            return new BigDecimal(linha);
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 }
