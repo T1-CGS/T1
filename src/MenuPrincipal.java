@@ -2,17 +2,22 @@ import dados.CargaInicial;
 import modelo.ItemPedido;
 import modelo.PedidoAquisicao;
 import modelo.Usuario;
+import servico.ResultadoBusca;
 import servico.ResultadoOperacao;
 import servico.ServicoPedidos;
 import sessao.Sessao;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-//As opcoes "Buscar pedidos" e "Ver estatisticas" dependem das issues 7 e 8 (do Membro 4), que ainda nao foram mergeadas, então aparecem no menu mas com aviso de "em desenvolvimento".
+//A opcao "Ver estatisticas" depende da issue 8 (do Membro 4), que ainda nao foi mergeada, então aparece no menu mas com aviso de "em desenvolvimento".
 public class MenuPrincipal {
+
+    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final Scanner entrada;
     private final Sessao sessao;
@@ -131,7 +136,7 @@ public class MenuPrincipal {
                 break;
 
             case 6:
-                avisarFuncionalidadePendente();
+                buscarPedidos();
                 break;
 
             case 7:
@@ -264,6 +269,160 @@ public class MenuPrincipal {
         exibirResultado(resultado);
     }
 
+    //Buscas do administrador (Issue 7). A filtragem fica no ServicoPedidos;
+    //aqui so a leitura dos criterios e a exibicao dos resultados.
+    private void buscarPedidos() {
+        if (!sessao.isAdministrador()) {
+            System.out.println("\nErro: somente administradores podem buscar pedidos.");
+            return;
+        }
+
+        boolean continuar = true;
+        while (continuar) {
+            System.out.println("\nBuscar pedidos:");
+            System.out.println("1 - Por intervalo de datas");
+            System.out.println("2 - Por funcionario solicitante");
+            System.out.println("3 - Por descricao de item");
+            System.out.println("0 - Voltar");
+            System.out.print("Escolha uma opcao: ");
+
+            int opcao = lerOpcao();
+
+            switch (opcao) {
+                case 1:
+                    buscarPorPeriodo();
+                    break;
+
+                case 2:
+                    buscarPorSolicitante();
+                    break;
+
+                case 3:
+                    buscarPorDescricaoItem();
+                    break;
+
+                case 0:
+                    continuar = false;
+                    break;
+
+                default:
+                    System.out.println("Opcao invalida.");
+            }
+        }
+    }
+
+    private void buscarPorPeriodo() {
+        System.out.print("\nData inicial (dd/MM/aaaa): ");
+        String textoInicio = entrada.nextLine();
+        LocalDate inicio = ServicoPedidos.interpretarData(textoInicio);
+        if (inicio == null) {
+            System.out.println("\nErro: \"" + textoInicio.trim() + "\" nao e uma data valida no formato dd/MM/aaaa.");
+            return;
+        }
+
+        System.out.print("Data final (dd/MM/aaaa): ");
+        String textoFim = entrada.nextLine();
+        LocalDate fim = ServicoPedidos.interpretarData(textoFim);
+        if (fim == null) {
+            System.out.println("\nErro: \"" + textoFim.trim() + "\" nao e uma data valida no formato dd/MM/aaaa.");
+            return;
+        }
+
+        exibirResultadoBusca(ServicoPedidos.buscarPorPeriodo(CargaInicial.pedidos, inicio, fim));
+    }
+
+    private void buscarPorSolicitante() {
+        System.out.println("\nSolicitantes:");
+        for (Usuario usuario : CargaInicial.usuarios) {
+            System.out.println("  " + usuario.getId() + " - " + usuario.getNome() + " - "
+                    + usuario.getDepartamento().getSigla() + " (" + usuario.getPapel().getDescricao() + ")");
+        }
+
+        System.out.print("Digite o id do solicitante (0 para cancelar): ");
+        int idSolicitante = lerOpcao();
+
+        if (idSolicitante == 0) {
+            return;
+        }
+
+        exibirResultadoBusca(ServicoPedidos.buscarPorSolicitante(CargaInicial.pedidos, CargaInicial.usuarios,
+                idSolicitante));
+    }
+
+    private void buscarPorDescricaoItem() {
+        System.out.print("\nTexto a pesquisar na descricao dos itens: ");
+        String pesquisa = entrada.nextLine();
+
+        exibirResultadoBusca(ServicoPedidos.buscarPorDescricaoItem(CargaInicial.pedidos, pesquisa));
+    }
+
+    //Mostra a lista resumida e deixa o administrador abrir os detalhes de
+    //qualquer pedido do resultado, ate digitar 0.
+    private void exibirResultadoBusca(ResultadoBusca resultado) {
+        if (!resultado.isSucesso()) {
+            System.out.println("\nErro: " + resultado.getMensagem());
+            return;
+        }
+
+        List<PedidoAquisicao> encontrados = resultado.getPedidos();
+        if (encontrados.isEmpty()) {
+            System.out.println("\nNenhum pedido encontrado.");
+            return;
+        }
+
+        boolean continuar = true;
+        while (continuar) {
+            System.out.println("\n" + encontrados.size() + " pedido(s) encontrado(s):");
+            for (PedidoAquisicao pedido : encontrados) {
+                System.out.println("  " + resumirPedido(pedido));
+            }
+
+            System.out.print("\nDigite o numero do pedido para ver os detalhes (0 para voltar): ");
+            int idPedido = lerOpcao();
+
+            if (idPedido == 0) {
+                continuar = false;
+                continue;
+            }
+
+            PedidoAquisicao pedido = buscarPedidoNaLista(encontrados, idPedido);
+            if (pedido == null) {
+                System.out.println("\nErro: o pedido informado nao esta entre os resultados da busca.");
+            } else {
+                exibirDetalhesPedido(pedido);
+            }
+        }
+    }
+
+    private String resumirPedido(PedidoAquisicao pedido) {
+        return "Pedido #" + pedido.getId()
+                + " | " + pedido.getSolicitante().getNome()
+                + " | " + pedido.getDepartamento().getSigla()
+                + " | Criado em " + pedido.getDataCriacao().format(FORMATO_DATA)
+                + " | " + pedido.getStatus().getDescricao()
+                + " | R$ " + pedido.getValorTotal();
+    }
+
+    private void exibirDetalhesPedido(PedidoAquisicao pedido) {
+        System.out.println("\n--- Detalhes do pedido #" + pedido.getId() + " ---");
+        System.out.println("Solicitante  : " + pedido.getSolicitante().getResumo());
+        System.out.println("Departamento : " + pedido.getDepartamento().getNome()
+                + " (" + pedido.getDepartamento().getSigla() + ")");
+        System.out.println("Status       : " + pedido.getStatus().getDescricao());
+        System.out.println("Criado em    : " + pedido.getDataCriacao().format(FORMATO_DATA));
+        if (pedido.getDataConclusao() != null) {
+            System.out.println("Concluido em : " + pedido.getDataConclusao().format(FORMATO_DATA));
+        }
+        System.out.println("Itens:");
+        for (ItemPedido item : pedido.getItens()) {
+            System.out.println("  - " + item.getDescricao()
+                    + " | Quantidade: " + item.getQuantidade() + " " + item.getUnidade()
+                    + " | Unitario: R$ " + item.getValorUnitario()
+                    + " | Subtotal: R$ " + item.getSubtotal());
+        }
+        System.out.println("Valor total  : R$ " + pedido.getValorTotal());
+    }
+
     //Permite trocar o usuario ativo na sessão, listando todos os usuarios cadastrados.
     private void trocarUsuario() {
         System.out.println("\nUsuarios disponiveis:");
@@ -335,8 +494,7 @@ public class MenuPrincipal {
         exibirResultado(resultado);
     }
 
-    //Ainda usado pelas opcoes de buscar pedidos e ver estatisticas (issues 7 e 8, do Membro 4).
-    //A issue 4 (registrar pedido) ja esta ligada a chamada real.
+    //Ainda usado pela opcao de ver estatisticas (issue 8, do Membro 4).
     private void avisarFuncionalidadePendente() {
         System.out.println("\nFuncionalidade ainda em desenvolvimento por outro membro do time.");
     }
