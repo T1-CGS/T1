@@ -7,13 +7,22 @@ import modelo.StatusPedido;
 import modelo.Usuario;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ServicoPedidos {
 
     private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    // STRICT recusa datas inexistentes como 31/02 em vez de ajusta-las.
+    private static final DateTimeFormatter FORMATO_DIA = DateTimeFormatter.ofPattern("dd/MM/uuuu")
+            .withResolverStyle(ResolverStyle.STRICT);
 
     // Registra um novo pedido de aquisicao para o solicitante informado.
     // O departamento vem do proprio solicitante e o status inicial e ABERTO.
@@ -195,6 +204,98 @@ public class ServicoPedidos {
         }
 
         return abertos;
+    }
+
+    // ---------- Buscas do administrador (Issue 7) ----------
+    // As buscas consideram pedidos de todos os status e devolvem uma lista nova,
+    // sem alterar os pedidos nem a lista original.
+
+    // Converte um texto no formato dd/MM/yyyy em data. Retorna null se o texto
+    // nao for uma data real nesse formato.
+    public static LocalDate interpretarData(String texto) {
+        if (texto == null) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(texto.trim(), FORMATO_DIA);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    // Pedidos criados entre as duas datas, incluindo os dois dias inteiros,
+    // qualquer que seja o horario de criacao.
+    public static ResultadoBusca buscarPorPeriodo(List<PedidoAquisicao> pedidos, LocalDate inicio, LocalDate fim) {
+        if (inicio == null || fim == null) {
+            return ResultadoBusca.falha("Informe a data inicial e a data final no formato dd/MM/aaaa.");
+        }
+
+        if (inicio.isAfter(fim)) {
+            return ResultadoBusca.falha("A data inicial (" + inicio.format(FORMATO_DIA)
+                    + ") e posterior a data final (" + fim.format(FORMATO_DIA) + ").");
+        }
+
+        LocalDateTime desde = inicio.atStartOfDay();
+        LocalDateTime antesDe = fim.plusDays(1).atStartOfDay();
+        List<PedidoAquisicao> encontrados = new ArrayList<>();
+
+        for (PedidoAquisicao pedido : pedidos) {
+            LocalDateTime criacao = pedido.getDataCriacao();
+            if (!criacao.isBefore(desde) && criacao.isBefore(antesDe)) {
+                encontrados.add(pedido);
+            }
+        }
+
+        return ResultadoBusca.sucesso(encontrados);
+    }
+
+    // Pedidos do solicitante com o id informado. A busca e pelo id, e nao pelo
+    // nome, para nao misturar pessoas com o mesmo nome.
+    public static ResultadoBusca buscarPorSolicitante(List<PedidoAquisicao> pedidos, List<Usuario> usuarios,
+            int idSolicitante) {
+        boolean usuarioExiste = false;
+        for (Usuario usuario : usuarios) {
+            if (usuario.getId() == idSolicitante) {
+                usuarioExiste = true;
+                break;
+            }
+        }
+
+        if (!usuarioExiste) {
+            return ResultadoBusca.falha("Usuario #" + idSolicitante + " nao encontrado.");
+        }
+
+        List<PedidoAquisicao> encontrados = new ArrayList<>();
+
+        for (PedidoAquisicao pedido : pedidos) {
+            if (pedido.getSolicitante() != null && pedido.getSolicitante().getId() == idSolicitante) {
+                encontrados.add(pedido);
+            }
+        }
+
+        return ResultadoBusca.sucesso(encontrados);
+    }
+
+    // Pedidos com pelo menos um item cuja descricao contem o texto pesquisado,
+    // sem diferenciar maiusculas e minusculas. Cada pedido aparece uma vez so.
+    public static ResultadoBusca buscarPorDescricaoItem(List<PedidoAquisicao> pedidos, String pesquisa) {
+        if (pesquisa == null || pesquisa.trim().isEmpty()) {
+            return ResultadoBusca.falha("Informe um texto para pesquisar na descricao dos itens.");
+        }
+
+        String termo = pesquisa.trim().toLowerCase(Locale.ROOT);
+        List<PedidoAquisicao> encontrados = new ArrayList<>();
+
+        for (PedidoAquisicao pedido : pedidos) {
+            for (ItemPedido item : pedido.getItens()) {
+                if (item.getDescricao() != null && item.getDescricao().toLowerCase(Locale.ROOT).contains(termo)) {
+                    encontrados.add(pedido);
+                    break;
+                }
+            }
+        }
+
+        return ResultadoBusca.sucesso(encontrados);
     }
 
     private static PedidoAquisicao buscarPorId(List<PedidoAquisicao> pedidos, int id) {
