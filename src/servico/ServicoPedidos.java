@@ -7,10 +7,13 @@ import modelo.StatusPedido;
 import modelo.Usuario;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ServicoPedidos {
+
+    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     // Registra um novo pedido de aquisicao para o solicitante informado.
     // O departamento vem do proprio solicitante e o status inicial e ABERTO.
@@ -139,6 +142,45 @@ public class ServicoPedidos {
         }
         return ResultadoOperacao
                 .sucesso("Pedido #" + pedido.getId() + " marcado como " + novoStatus.getDescricao() + ".");
+    }
+
+    // Conclui um pedido aprovado apos a entrega (Issue #2). A data e hora da
+    // conclusao sao registradas automaticamente. Nao ha regra no enunciado sobre
+    // quem conclui, entao adotamos a mesma regra da avaliacao: somente administrador.
+    public static ResultadoOperacao concluirPedido(Usuario administrador, PedidoAquisicao pedido) {
+        if (administrador == null || !administrador.isAdministrador()) {
+            return ResultadoOperacao.falha("Somente um administrador pode concluir pedidos.");
+        }
+
+        if (pedido == null) {
+            return ResultadoOperacao.falha("Pedido nao encontrado.");
+        }
+
+        if (pedido.getStatus() == StatusPedido.CONCLUIDO) {
+            return ResultadoOperacao.falha("Pedido #" + pedido.getId() + " ja esta concluido.");
+        }
+
+        if (pedido.getStatus() != StatusPedido.APROVADO) {
+            return ResultadoOperacao.falha("Somente pedidos com status APROVADO podem ser concluidos. Pedido #"
+                    + pedido.getId() + " esta " + pedido.getStatus().getDescricao() + ".");
+        }
+
+        pedido.concluir();
+        return ResultadoOperacao.sucesso("Pedido #" + pedido.getId() + " marcado como Concluido em "
+                + pedido.getDataConclusao().format(FORMATO_DATA) + ".");
+    }
+
+    // Lista os pedidos aprovados, que sao os unicos que podem ser concluidos.
+    public static List<PedidoAquisicao> listarPedidosAprovados(List<PedidoAquisicao> pedidos) {
+        List<PedidoAquisicao> aprovados = new ArrayList<>();
+
+        for (PedidoAquisicao pedido : pedidos) {
+            if (pedido.getStatus() == StatusPedido.APROVADO) {
+                aprovados.add(pedido);
+            }
+        }
+
+        return aprovados;
     }
 
     // Lista todos os pedidos com status "aberrto", usados na tela de avaliação do
