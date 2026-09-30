@@ -100,9 +100,10 @@ public class MenuPrincipal {
         System.out.println("2 - Registrar novo pedido");
         System.out.println("3 - Excluir pedido aberto");
         System.out.println("4 - Avaliar pedidos abertos (aprovar/reprovar)");
-        System.out.println("5 - Buscar pedidos");
-        System.out.println("6 - Ver estatisticas gerais");
-        System.out.println("7 - Trocar usuario");
+        System.out.println("5 - Concluir pedido entregue");
+        System.out.println("6 - Buscar pedidos");
+        System.out.println("7 - Ver estatisticas gerais");
+        System.out.println("8 - Trocar usuario");
         System.out.println("0 - Sair");
         System.out.print("Escolha uma opcao: ");
 
@@ -126,7 +127,7 @@ public class MenuPrincipal {
                 break;
 
             case 5:
-                avisarFuncionalidadePendente();
+                concluirPedidoEntregue();
                 break;
 
             case 6:
@@ -134,6 +135,10 @@ public class MenuPrincipal {
                 break;
 
             case 7:
+                avisarFuncionalidadePendente();
+                break;
+
+            case 8:
                 trocarUsuario();
                 break;
 
@@ -197,7 +202,7 @@ public class MenuPrincipal {
             return;
         }
 
-        PedidoAquisicao pedidoEscolhido = buscarPedidoAberto(abertos, idPedido);
+        PedidoAquisicao pedidoEscolhido = buscarPedidoNaLista(abertos, idPedido);
         if (pedidoEscolhido == null) {
             System.out.println("Pedido aberto nao encontrado.");
             return;
@@ -216,6 +221,46 @@ public class MenuPrincipal {
             return;
         }
 
+        exibirResultado(resultado);
+    }
+
+    //Conclusao de pedido entregue (Issue 2). Somente pedidos aprovados aparecem na lista.
+    private void concluirPedidoEntregue() {
+        List<PedidoAquisicao> aprovados = ServicoPedidos.listarPedidosAprovados(CargaInicial.pedidos);
+
+        if (aprovados.isEmpty()) {
+            System.out.println("\nNao ha pedidos aprovados aguardando conclusao.");
+            return;
+        }
+
+        System.out.println("\nPedidos aprovados aguardando entrega:");
+        for (PedidoAquisicao pedido : aprovados) {
+            System.out.println("  " + pedido);
+            for (ItemPedido item : pedido.getItens()) {
+                System.out.println("      - " + item);
+            }
+        }
+
+        System.out.print("\nDigite o numero do pedido entregue (0 para cancelar): ");
+        int idPedido = lerOpcao();
+
+        if (idPedido == 0) {
+            System.out.println("Conclusao cancelada.");
+            return;
+        }
+
+        if (idPedido < 0) {
+            System.out.println("\nErro: numero de pedido invalido.");
+            return;
+        }
+
+        PedidoAquisicao pedidoEscolhido = buscarPedidoNaLista(aprovados, idPedido);
+        if (pedidoEscolhido == null) {
+            System.out.println("\nErro: Pedido #" + idPedido + " nao esta na lista de pedidos aprovados.");
+            return;
+        }
+
+        ResultadoOperacao resultado = ServicoPedidos.concluirPedido(sessao.getUsuarioAtual(), pedidoEscolhido);
         exibirResultado(resultado);
     }
 
@@ -304,8 +349,8 @@ public class MenuPrincipal {
         }
     }
 
-    private PedidoAquisicao buscarPedidoAberto(List<PedidoAquisicao> abertos, int id) {
-        for (PedidoAquisicao pedido : abertos) {
+    private PedidoAquisicao buscarPedidoNaLista(List<PedidoAquisicao> lista, int id) {
+        for (PedidoAquisicao pedido : lista) {
             if (pedido.getId() == id) {
                 return pedido;
             }
