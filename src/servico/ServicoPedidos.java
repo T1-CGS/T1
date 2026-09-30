@@ -66,10 +66,11 @@ public class ServicoPedidos {
 
         PedidoAquisicao pedido = new PedidoAquisicao(proximoId(pedidos), solicitante);
 
+        // Os itens sao imutaveis, entao a numeracao e feita criando novos itens.
         for (int i = 0; i < itens.size(); i++) {
             ItemPedido item = itens.get(i);
-            item.setId(i + 1);
-            pedido.adicionarItem(item);
+            pedido.adicionarItem(new ItemPedido(i + 1, item.getDescricao(), item.getQuantidade(),
+                    item.getUnidade(), item.getValorUnitario()));
         }
 
         pedidos.add(pedido);
@@ -131,7 +132,11 @@ public class ServicoPedidos {
                     .falha("Somente pedidos com status ABERTO podem ser avaliados (regra de imutabilidade).");
         }
 
-        pedido.setStatus(novoStatus);
+        if (novoStatus == StatusPedido.APROVADO) {
+            pedido.aprovar();
+        } else {
+            pedido.reprovar();
+        }
         return ResultadoOperacao
                 .sucesso("Pedido #" + pedido.getId() + " marcado como " + novoStatus.getDescricao() + ".");
     }
