@@ -35,6 +35,7 @@ codigo 1 se alguma verificacao falhar.
 ```sh
 javac --release 11 -d out $(find src test -name "*.java")
 java -cp out TesteRegrasPedido
+java -cp out TesteBuscasPedidos
 ```
 
 ## Ciclo de vida dos pedidos
@@ -53,3 +54,20 @@ ABERTO --aprovar--> APROVADO --concluir--> CONCLUIDO
 - Pedidos aprovados, reprovados ou concluidos nunca voltam a ser abertos. O
   bloqueio e garantido no proprio modelo: `getItens()` devolve uma lista
   somente leitura e `ItemPedido` e imutavel.
+
+## Buscas do administrador
+
+No menu do administrador, a opcao "Buscar pedidos" abre um submenu com tres
+modalidades. Todas consideram pedidos de qualquer status e nao alteram nada:
+
+1. **Por intervalo de datas**: informe a data inicial e a final no formato
+   `dd/MM/aaaa`. Os dois dias entram inteiros no resultado, pela data de
+   criacao do pedido.
+2. **Por funcionario solicitante**: escolha o solicitante pelo id na lista
+   exibida (funcionarios e administradores).
+3. **Por descricao de item**: digite parte da descricao, sem diferenciar
+   maiusculas e minusculas (ex.: `cadeira` encontra "Cadeira ergonomica").
+
+O resultado mostra numero, solicitante, departamento, data de criacao, status e
+valor total de cada pedido. Digite o numero de um pedido da lista para ver os
+itens e as datas, ou `0` para voltar.
