@@ -4,7 +4,6 @@ import modelo.Departamento;
 import modelo.ItemPedido;
 import modelo.Papel;
 import modelo.PedidoAquisicao;
-import modelo.StatusPedido;
 import modelo.Usuario;
 
 import java.math.BigDecimal;
@@ -82,6 +81,12 @@ public class CargaInicial {
         usuarios.add(new Usuario(20, "Paulo Henrique Silva", Papel.FUNCIONARIO, man));
     }
 
+    /**
+     * Os pedidos de exemplo tem datas de criacao no passado e passam pelas
+     * mesmas transicoes de status do sistema (aprovar, reprovar, concluir),
+     * entao a data de conclusao so existe em pedidos concluidos e nunca e
+     * anterior a criacao.
+     */
     private static void carregarPedidos() {
         Usuario bruno = buscarUsuarioPorId(2);
         Usuario elisa = buscarUsuarioPorId(6);
@@ -90,42 +95,44 @@ public class CargaInicial {
         Usuario lucas = buscarUsuarioPorId(15);
         Usuario nicolas = buscarUsuarioPorId(18);
 
+        LocalDateTime agora = LocalDateTime.now();
+
         // Pedido 1 - Aberto (TI)
-        PedidoAquisicao pedido1 = new PedidoAquisicao(1, bruno);
+        PedidoAquisicao pedido1 = new PedidoAquisicao(1, bruno, agora.minusDays(1));
         pedido1.adicionarItem(new ItemPedido(1, "Notebook Dell Inspiron", 1, "un", new BigDecimal("4200.00")));
         pedido1.adicionarItem(new ItemPedido(2, "Mouse sem fio", 2, "un", new BigDecimal("85.00")));
         pedidos.add(pedido1);
 
-        // Pedido 2 - Aprovado, com data de conclusao (Financeiro)
-        PedidoAquisicao pedido2 = new PedidoAquisicao(2, elisa);
+        // Pedido 2 - Aprovado, aguardando entrega (Financeiro)
+        PedidoAquisicao pedido2 = new PedidoAquisicao(2, elisa, agora.minusDays(6));
         pedido2.adicionarItem(new ItemPedido(1, "Licenca de software de planilhas", 10, "un", new BigDecimal("450.00")));
-        pedido2.setStatus(StatusPedido.APROVADO);
-        pedido2.setDataConclusao(LocalDateTime.now().minusDays(2));
+        pedido2.aprovar();
         pedidos.add(pedido2);
 
         // Pedido 3 - Reprovado (RH)
-        PedidoAquisicao pedido3 = new PedidoAquisicao(3, hugo);
+        PedidoAquisicao pedido3 = new PedidoAquisicao(3, hugo, agora.minusDays(8));
         pedido3.adicionarItem(new ItemPedido(1, "Cadeira ergonomica", 12, "un", new BigDecimal("1200.00")));
-        pedido3.setStatus(StatusPedido.REPROVADO);
+        pedido3.reprovar();
         pedidos.add(pedido3);
 
         // Pedido 4 - Aberto (Engenharia)
-        PedidoAquisicao pedido4 = new PedidoAquisicao(4, lucas);
+        PedidoAquisicao pedido4 = new PedidoAquisicao(4, lucas, agora.minusDays(2));
         pedido4.adicionarItem(new ItemPedido(1, "Kit de ferramentas industriais", 5, "un", new BigDecimal("980.00")));
         pedido4.adicionarItem(new ItemPedido(2, "Capacete de seguranca", 8, "un", new BigDecimal("75.00")));
         pedidos.add(pedido4);
 
-        // Pedido 5 - Aprovado (Manutencao)
-        PedidoAquisicao pedido5 = new PedidoAquisicao(5, nicolas);
+        // Pedido 5 - Aprovado, aguardando entrega (Manutencao)
+        PedidoAquisicao pedido5 = new PedidoAquisicao(5, nicolas, agora.minusDays(4));
         pedido5.adicionarItem(new ItemPedido(1, "Compressor de ar", 1, "un", new BigDecimal("3800.00")));
-        pedido5.setStatus(StatusPedido.APROVADO);
+        pedido5.aprovar();
         pedidos.add(pedido5);
 
-        // Pedido 6 - Concluido, com data de conclusao (Engenharia)
-        PedidoAquisicao pedido6 = new PedidoAquisicao(6, karina);
+        // Pedido 6 - Concluido (Engenharia). A data de conclusao e registrada
+        // automaticamente no momento da carga, depois da data de criacao.
+        PedidoAquisicao pedido6 = new PedidoAquisicao(6, karina, agora.minusDays(12));
         pedido6.adicionarItem(new ItemPedido(1, "Licenca de software CAD", 3, "un", new BigDecimal("2200.00")));
-        pedido6.setStatus(StatusPedido.CONCLUIDO);
-        pedido6.setDataConclusao(LocalDateTime.now().minusDays(5));
+        pedido6.aprovar();
+        pedido6.concluir();
         pedidos.add(pedido6);
     }
 

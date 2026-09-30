@@ -5,13 +5,17 @@ import java.math.BigDecimal;
 /**
  * Item de um pedido de aquisicao (Requisito 5.6).
  * Contem descricao, quantidade, valor unitario e total do item.
+ *
+ * O item e imutavel: depois de criado nao pode ser alterado. Assim, nem o
+ * pedido nem quem guardou uma referencia ao item conseguem mudar os dados de
+ * um pedido ja aprovado, reprovado ou concluido (Issue #2).
  */
 public class ItemPedido {
-    private int id;
-    private String descricao;
-    private int quantidade;
-    private String unidade;
-    private BigDecimal valorUnitario;
+    private final int id;
+    private final String descricao;
+    private final int quantidade;
+    private final String unidade;
+    private final BigDecimal valorUnitario;
 
     public ItemPedido(int id, String descricao, int quantidade, String unidade, BigDecimal valorUnitario) {
         this.id = id;
@@ -25,40 +29,20 @@ public class ItemPedido {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getDescricao() {
         return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
     }
 
     public int getQuantidade() {
         return quantidade;
     }
 
-    public void setQuantidade(int quantidade) {
-        this.quantidade = quantidade;
-    }
-
     public String getUnidade() {
         return unidade;
     }
 
-    public void setUnidade(String unidade) {
-        this.unidade = unidade;
-    }
-
     public BigDecimal getValorUnitario() {
         return valorUnitario;
-    }
-
-    public void setValorUnitario(BigDecimal valorUnitario) {
-        this.valorUnitario = valorUnitario;
     }
 
     /**
