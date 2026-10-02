@@ -88,3 +88,17 @@ A opcao **7 - Ver estatisticas gerais** mostra:
 
 Quando nao ha pedidos, as contagens, percentuais e media sao zero. Quando nao
 ha pedidos abertos, o sistema informa isso. As consultas nao alteram os dados.
+
+## Relatorio e entrega
+
+- [Relatorio final em PDF](output/pdf/relatorio-final-t1.pdf)
+- [Fonte editavel do relatorio](docs/relatorio-final.md)
+- [Evidencias do Git e dos testes](docs/evidencias/)
+
+O PDF pode ser regenerado com `python3 docs/gerar_relatorio.py`, instalando
+`reportlab` apenas para essa tarefa de documentacao. Essa dependencia nao e
+necessaria para compilar, testar ou executar o sistema Java.
+
+A equipe deve enviar o relatorio na atividade do Moodle quando o acesso
+estiver disponivel. A presenca dos arquivos no repositorio nao representa
+uma submissao ao Moodle.

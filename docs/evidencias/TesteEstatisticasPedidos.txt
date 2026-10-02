@@ -1,0 +1,32 @@
+OK: lista vazia tem contagens zero
+OK: lista vazia nao divide por zero
+OK: lista vazia tem media zero
+OK: lista vazia nao tem maior pedido aberto
+OK: periodo tem 30 datas incluindo hoje
+OK: lista ausente recusada
+OK: referencia ausente recusada
+OK: total inclui todos os status
+OK: contagens usam o status atual, sem duplicar concluidos
+OK: percentuais usam total como base
+OK: media inclui pedidos de todos os status
+OK: pedido fechado de maior valor nao entra no destaque
+OK: inclui inicio e referencia exatos, exclui antes e depois
+OK: media usa somente pedidos do periodo
+OK: total geral continua incluindo pedidos fora do periodo
+OK: sem pedidos recentes a media e zero
+OK: media arredonda meio centavo para cima
+OK: percentual fracionario tem duas casas
+OK: media e por pedido e soma quantidades e itens
+OK: lista sem abertos nao destaca aprovado
+OK: empate escolhe menor numero independentemente da ordem
+OK: pedido aberto de valor zero tambem e encontrado
+OK: consulta preserva ordem, itens, status e datas
+OK: opcao 7 abre estatisticas reais
+OK: menu mostra contagens e percentuais da carga
+OK: menu mostra quantidade e media em reais
+OK: menu exibe detalhes do maior pedido aberto
+OK: menu retorna e encerra normalmente sem placeholder
+OK: menu nao modifica a carga
+OK: funcionario nao acessa estatisticas
+OK: menu trata lista vazia e ausencia de pedido aberto
+31 verificacoes, 0 falhas. Todos os testes passaram.
