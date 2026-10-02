@@ -2,6 +2,7 @@ import dados.CargaInicial;
 import modelo.ItemPedido;
 import modelo.PedidoAquisicao;
 import modelo.Usuario;
+import servico.EstatisticasPedidos;
 import servico.ResultadoBusca;
 import servico.ResultadoOperacao;
 import servico.ServicoPedidos;
@@ -12,12 +13,15 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
+import java.text.NumberFormat;
 
-//A opcao "Ver estatisticas" depende da issue 8 (do Membro 4), que ainda nao foi mergeada, então aparece no menu mas com aviso de "em desenvolvimento".
 public class MenuPrincipal {
 
     private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter FORMATO_DIA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final Locale PORTUGUES_BR = new Locale("pt", "BR");
 
     private final Scanner entrada;
     private final Sessao sessao;
@@ -140,7 +144,7 @@ public class MenuPrincipal {
                 break;
 
             case 7:
-                avisarFuncionalidadePendente();
+                verEstatisticasGerais();
                 break;
 
             case 8:
@@ -494,9 +498,40 @@ public class MenuPrincipal {
         exibirResultado(resultado);
     }
 
-    //Ainda usado pela opcao de ver estatisticas (issue 8, do Membro 4).
-    private void avisarFuncionalidadePendente() {
-        System.out.println("\nFuncionalidade ainda em desenvolvimento por outro membro do time.");
+    private void verEstatisticasGerais() {
+        if (!sessao.isAdministrador()) {
+            System.out.println("\nErro: somente um administrador pode consultar as estatisticas.");
+            return;
+        }
+
+        EstatisticasPedidos resumo = ServicoPedidos.calcularEstatisticas(CargaInicial.pedidos);
+        System.out.println("\n--- Estatisticas gerais ---");
+        System.out.println("Total de pedidos: " + resumo.getTotal());
+        System.out.println("Percentuais sobre o total, por status atual:");
+        exibirEstatisticaStatus("Abertos", resumo.getAbertos(), resumo.getPercentualAbertos());
+        exibirEstatisticaStatus("Aprovados", resumo.getAprovados(), resumo.getPercentualAprovados());
+        exibirEstatisticaStatus("Reprovados", resumo.getReprovados(), resumo.getPercentualReprovados());
+        exibirEstatisticaStatus("Concluidos", resumo.getConcluidos(), resumo.getPercentualConcluidos());
+
+        System.out.println("\nUltimos 30 dias (incluindo hoje): "
+                + resumo.getInicioPeriodo().format(FORMATO_DIA) + " a "
+                + resumo.getFimPeriodo().format(FORMATO_DIA));
+        System.out.println("Pedidos criados no periodo: " + resumo.getPedidosRecentes());
+        String media = NumberFormat.getCurrencyInstance(PORTUGUES_BR).format(resumo.getValorMedioRecente());
+        System.out.println("Valor medio por pedido no periodo: " + media);
+
+        PedidoAquisicao maior = resumo.getMaiorPedidoAberto();
+        if (maior == null) {
+            System.out.println("\nNao ha pedidos abertos.");
+        } else {
+            System.out.println("\nPedido aberto de maior valor:");
+            exibirDetalhesPedido(maior);
+        }
+    }
+
+    private void exibirEstatisticaStatus(String nome, int quantidade, BigDecimal percentual) {
+        System.out.println("  " + nome + ": " + quantidade + " ("
+                + percentual.toPlainString().replace('.', ',') + "%)");
     }
 
     private void exibirResultado(ResultadoOperacao resultado) {

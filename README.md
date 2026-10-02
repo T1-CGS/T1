@@ -36,6 +36,7 @@ codigo 1 se alguma verificacao falhar.
 javac --release 11 -d out $(find src test -name "*.java")
 java -cp out TesteRegrasPedido
 java -cp out TesteBuscasPedidos
+java -cp out TesteEstatisticasPedidos
 ```
 
 ## Ciclo de vida dos pedidos
@@ -71,3 +72,19 @@ modalidades. Todas consideram pedidos de qualquer status e nao alteram nada:
 O resultado mostra numero, solicitante, departamento, data de criacao, status e
 valor total de cada pedido. Digite o numero de um pedido da lista para ver os
 itens e as datas, ou `0` para voltar.
+
+## Estatisticas do administrador
+
+A opcao **7 - Ver estatisticas gerais** mostra:
+
+- Total de pedidos, quantidade e percentual em cada status atual. Todos os
+  percentuais usam o total como denominador; concluidos aparecem separados
+  dos aprovados que ainda aguardam entrega.
+- Quantidade e valor medio dos pedidos criados nos ultimos 30 dias, incluindo
+  hoje e os 29 dias anteriores, ate o momento da consulta. A media considera
+  o total de cada pedido, de qualquer status, e e arredondada para centavos.
+- Detalhes do pedido aberto de maior valor. Em caso de empate, aparece o
+  pedido com o menor numero.
+
+Quando nao ha pedidos, as contagens, percentuais e media sao zero. Quando nao
+ha pedidos abertos, o sistema informa isso. As consultas nao alteram os dados.
