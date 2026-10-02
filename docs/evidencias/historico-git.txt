@@ -1,0 +1,42 @@
+*   8766482 (HEAD -> feature/final-report, origin/develop, origin/HEAD, develop) Merge pull request #19 from T1-CGS/feature/admin-statistics
+|\
+| * d34330a (origin/feature/admin-statistics, feature/admin-statistics) feat: implementar estatisticas gerais do administrador
+|/
+*   4e38829 Merge pull request #18 from T1-CGS/feature/admin-search-filters
+|\
+| * 8771de4 (origin/feature/admin-search-filters) test: adicionar testes das buscas e documentar o uso no README
+| * 4eedb78 feat(menu): submenu de buscas do administrador com detalhes do pedido
+| * a73985f feat(buscas): filtrar pedidos por periodo, solicitante e descricao de item
+|/
+*   3ce699d Merge pull request #17 from T1-CGS/feature/order-lifecycle-rules
+|\
+| * 3b2ae5d (origin/feature/order-lifecycle-rules) test: adicionar testes das regras de ciclo de vida e atualizar README
+| * 1184409 feat(pedidos): concluir pedidos aprovados apos a entrega
+| * fe181c5 feat(modelo): bloquear alteracao e reabertura de pedidos avaliados
+|/
+*   ecd0bf9 Merge pull request #16 from T1-CGS/feature/create-order-and-limits
+|\
+| * 0174f45 (origin/feature/create-order-and-limits) feat: registrar novo pedido com validacao do teto do departamento
+|/
+*   10016ee Merge pull request #15 from T1-CGS/feature/admin-order-review-and-menu
+|\
+| * 01aa2e6 (origin/feature/admin-order-review-and-menu) feat: implement admin order review and profile-based menu
+|/
+*   088c63f Merge pull request #14 from T1-CGS/feature/delete-open-order
+|\
+| * 61d17a4 (origin/feature/delete-open-order) feat: implement open order deletion restricted to creator
+|/
+*   986b45c Merge pull request #13 from T1-CGS/feature/initial-mock-data
+|\
+| * c620e5c (origin/feature/initial-mock-data) fix(dados): ajustar carga para 15 funcionarios e evitar duplicacao ao recarregar
+* | f602093 Merge pull request #12 from T1-CGS/feature/initial-mock-data
+|\|
+| * b23dc13 feat(dados): adicionar carga inicial de departamentos, usuarios e pedidos
+|/
+*   e473468 Merge pull request #11 from feature/core-models-and-users
+|\
+| * 834ad11 (origin/feature/core-models-and-users, feature/core-models-and-users) feat(sessao): adicionar controle de sessao com alternancia de usuario e ponto de entrada
+| * 1259217 feat(modelo): implementar entidades de dominio (Papel, Departamento, Usuario, ItemPedido, StatusPedido, PedidoAquisicao)
+| * 6afc440 chore: adicionar arquivo .gitignore
+|/
+* c1a5df0 (origin/main, main) Initial commit

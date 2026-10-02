@@ -1,0 +1,28 @@
+name: Compilacao e testes Java
+
+on:
+  push:
+    branches: [develop, main, 'feature/**']
+  pull_request:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+      - name: Compilar com verificacoes do compilador
+        run: javac --release 11 -Xlint:all -Werror -d out $(find src test -name '*.java')
+      - name: Testar regras de pedidos
+        run: java -cp out TesteRegrasPedido
+      - name: Testar buscas
+        run: java -cp out TesteBuscasPedidos
+      - name: Testar estatisticas
+        run: java -cp out TesteEstatisticasPedidos

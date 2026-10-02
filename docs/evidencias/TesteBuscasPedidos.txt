@@ -1,0 +1,74 @@
+
+[Busca por intervalo de datas]
+  ok    intervalo valido aceito
+  ok    inclui pedido criado as 00:00 do primeiro dia
+  ok    inclui pedido criado as 23:59:59.999 do ultimo dia
+  ok    exclui pedido do dia anterior (23:59:59)
+  ok    exclui pedido do dia seguinte (00:00)
+  ok    resultado na ordem original: 1, 2, 5
+  ok    intervalo de um dia so pega o dia inteiro
+  ok    busca considera pedidos de todos os status
+  ok    intervalo sem pedidos retorna lista vazia
+
+[Datas invalidas e intervalo invertido]
+  ok    29/02/2024 (bissexto) e valida
+  ok    espacos em volta sao ignorados
+  ok    "31/02/2026" e recusada
+  ok    "29/02/2025" e recusada
+  ok    "32/01/2026" e recusada
+  ok    "10/13/2026" e recusada
+  ok    "2026-01-10" e recusada
+  ok    "5/1/2026" e recusada
+  ok    "abc" e recusada
+  ok    "" e recusada
+  ok    "   " e recusada
+  ok    null e recusado
+  ok    intervalo invertido recusado com mensagem
+  ok    data inicial ausente recusada
+  ok    data final ausente recusada
+
+[Busca por funcionario solicitante]
+  ok    funcionario com pedidos
+  ok    funcionario sem pedidos retorna lista vazia
+  ok    administrador solicitante tambem e encontrado
+  ok    homonimo: busca pelo id do Joao da TI
+  ok    homonimo: Joao do RH nao recebe os pedidos do Joao da TI
+  ok    id inexistente recusado
+
+[Busca por descricao de item]
+  ok    "cadeira" encontra "Cadeira ergonomica" e "CADEIRA de escritorio"
+  ok    maiusculas nao fazem diferenca
+  ok    correspondencia parcial no meio da descricao
+  ok    espacos em volta da pesquisa sao ignorados
+  ok    pedido com dois itens aparece uma vez so
+  ok    pesquisa vazia recusada
+  ok    pesquisa so com espacos recusada
+  ok    pesquisa nula recusada
+  ok    pesquisa sem resultado retorna lista vazia
+
+[Preservacao dos dados]
+  ok    pedidos, itens, status e datas iguais apos as buscas
+  ok    lista do resultado e somente leitura
+  ok    lista original mantem os 5 pedidos
+  ok    resultado aponta para os mesmos pedidos (sem copias)
+  ok    pedido concluido encontrado na busca continua bloqueado
+
+[Menu: submenu, detalhes e retorno]
+  ok    submenu exibido
+  ok    lista resumida com numero, solicitante, departamento e data
+  ok    lista resumida com status e total
+  ok    detalhes mostram descricao, quantidade, unidade, unitario e subtotal
+  ok    pedido inexistente e pedido fora do resultado sao recusados
+  ok    detalhes de pedido fora do resultado nao aparecem
+  ok    detalhes mostram a data de conclusao quando existe
+  ok    id de solicitante inexistente
+  ok    data invalida no menu
+  ok    intervalo invertido no menu
+  ok    pesquisa vazia no menu
+  ok    ausencia de resultados informada
+  ok    volta ao menu principal e sai normalmente
+  ok    dados da carga inicial preservados apos as buscas
+  ok    funcionario nao acessa as buscas
+
+59 verificacoes, 0 falha(s).
+Todos os testes passaram.

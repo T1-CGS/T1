@@ -1,0 +1,7 @@
+out/
+*.class
+.idea/
+*.iml
+.DS_Store
+tmp/
+output/entrega/*.zip
