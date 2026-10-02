@@ -3,3 +3,5 @@ out/
 .idea/
 *.iml
 .DS_Store
+tmp/
+output/entrega/*.zip

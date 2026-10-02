@@ -1,0 +1,120 @@
+
+[Conclusao valida]
+  ok    admin conclui pedido aprovado
+  ok    status passa a CONCLUIDO
+  ok    data de conclusao registrada
+  ok    data de conclusao e o momento da operacao
+  ok    data de conclusao nao e anterior a criacao
+  ok    mensagem de sucesso clara
+
+[Conclusao invalida]
+  ok    nao conclui pedido aberto
+  ok    pedido aberto continua aberto e sem data de conclusao
+  ok    nao conclui pedido reprovado
+  ok    pedido reprovado continua reprovado e sem data de conclusao
+  ok    nao conclui pedido ja concluido
+  ok    mensagem explica que ja esta concluido
+  ok    data de conclusao original preservada
+  ok    pedido inexistente e recusado
+  ok    modelo recusa concluir pedido aberto
+
+[Autorizacao da conclusao]
+  ok    funcionario nao pode concluir
+  ok    mensagem cita a regra de autorizacao
+  ok    sem usuario nao pode concluir
+  ok    pedido continua aprovado depois das tentativas negadas
+  ok    lista de elegiveis contem so aprovados
+
+[Tentativa de reabertura / reavaliacao]
+  ok    Aprovado: servico recusa aprovar
+  ok    Aprovado: servico recusa reprovar
+  ok    Aprovado: modelo recusa aprovar
+  ok    Aprovado: modelo recusa reprovar
+  ok    Aprovado: status inalterado
+  ok    Aprovado: pedido nao editavel
+  ok    Reprovado: servico recusa aprovar
+  ok    Reprovado: servico recusa reprovar
+  ok    Reprovado: modelo recusa aprovar
+  ok    Reprovado: modelo recusa reprovar
+  ok    Reprovado: status inalterado
+  ok    Reprovado: pedido nao editavel
+  ok    Concluido: servico recusa aprovar
+  ok    Concluido: servico recusa reprovar
+  ok    Concluido: modelo recusa aprovar
+  ok    Concluido: modelo recusa reprovar
+  ok    Concluido: status inalterado
+  ok    Concluido: pedido nao editavel
+  ok    nao existe setStatus publico para reabrir o pedido
+  ok    nao existe setDataConclusao publico
+
+[Alteracao de itens pela lista retornada]
+  ok    getItens().add recusado
+  ok    getItens().clear recusado
+  ok    getItens().remove recusado
+  ok    adicionarItem recusado em pedido aprovado
+  ok    removerItem recusado em pedido aprovado
+  ok    itens e total inalterados
+  ok    pedido aberto ainda aceita novos itens
+  ok    pedido aberto ainda permite remover itens
+
+[Alteracao por referencias externas aos itens]
+  ok    ItemPedido nao tem setters publicos
+  ok    registro com lista do solicitante
+  ok    alterar a lista original nao altera o pedido
+  ok    total do pedido preservado
+  ok    item do pedido mantem os dados registrados
+  ok    numeracao dos itens nao altera o objeto do solicitante
+
+[Alteracao de dados do pedido bloqueado]
+  ok    setId recusado
+  ok    setSolicitante recusado
+  ok    dados inalterados
+  ok    data de criacao no futuro e recusada
+
+[Regressao: registro e limite do departamento]
+  ok    pedido igual ao teto e aceito
+  ok    id sequencial a partir do maior existente
+  ok    novo pedido aberto e sem data de conclusao
+  ok    departamento vem do solicitante
+  ok    pedido acima do teto recusado
+  ok    quantidade invalida recusada
+  ok    pedido sem itens recusado
+  ok    pedidos recusados nao entram na lista
+
+[Regressao: exclusao restrita ao criador]
+  ok    outro usuario nao exclui
+  ok    admin nao exclui pedido alheio
+  ok    criador nao exclui pedido aprovado
+  ok    pedido inexistente
+  ok    criador exclui pedido aberto
+  ok    somente o pedido aberto foi removido
+
+[Regressao: aprovacao e reprovacao]
+  ok    funcionario nao aprova
+  ok    pedido continua aberto
+  ok    admin aprova
+  ok    aprovado sem data de conclusao
+  ok    admin reprova
+  ok    reprovado sem data de conclusao
+  ok    lista de abertos correta
+
+[Regressao: troca de usuario]
+  ok    sessao inicia com administrador
+  ok    troca para funcionario
+  ok    descricao mostra id, nome, iniciais, papel e departamento
+
+[Carga inicial]
+  ok    5 departamentos
+  ok    15 funcionarios
+  ok    5 administradores
+  ok    6 pedidos (carga repetida nao duplica)
+  ok    existe exemplo com status Aberto
+  ok    existe exemplo com status Aprovado
+  ok    existe exemplo com status Reprovado
+  ok    existe exemplo com status Concluido
+  ok    so pedidos concluidos tem data de conclusao, sempre apos a criacao
+  ok    carga tem 2 pedidos aprovados prontos para conclusao
+  ok    pedido concluido da carga continua bloqueado
+
+93 verificacoes, 0 falha(s).
+Todos os testes passaram.
