@@ -7,6 +7,7 @@ import modelo.StatusPedido;
 import modelo.Usuario;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -296,6 +297,68 @@ public class ServicoPedidos {
         }
 
         return ResultadoBusca.sucesso(encontrados);
+    }
+
+    // ---------- Estatisticas gerais do administrador (Issue #8) ----------
+
+    public static EstatisticasPedidos calcularEstatisticas(List<PedidoAquisicao> pedidos) {
+        return calcularEstatisticas(pedidos, LocalDateTime.now());
+    }
+
+    // Os ultimos 30 dias incluem hoje e os 29 dias anteriores, ate o instante
+    // de referencia. O parametro torna os limites do periodo testaveis.
+    public static EstatisticasPedidos calcularEstatisticas(List<PedidoAquisicao> pedidos,
+            LocalDateTime referencia) {
+        if (pedidos == null || referencia == null) {
+            throw new IllegalArgumentException("Informe os pedidos e o instante de referencia.");
+        }
+
+        LocalDate inicio = referencia.toLocalDate().minusDays(29);
+        LocalDateTime desde = inicio.atStartOfDay();
+        int abertos = 0;
+        int aprovados = 0;
+        int reprovados = 0;
+        int concluidos = 0;
+        int recentes = 0;
+        BigDecimal somaRecente = BigDecimal.ZERO;
+        BigDecimal maiorValor = BigDecimal.ZERO;
+        PedidoAquisicao maiorAberto = null;
+
+        for (PedidoAquisicao pedido : pedidos) {
+            BigDecimal valor = pedido.getValorTotal();
+            switch (pedido.getStatus()) {
+                case ABERTO:
+                    abertos++;
+                    if (maiorAberto == null || valor.compareTo(maiorValor) > 0
+                            || (valor.compareTo(maiorValor) == 0 && pedido.getId() < maiorAberto.getId())) {
+                        maiorAberto = pedido;
+                        maiorValor = valor;
+                    }
+                    break;
+                case APROVADO:
+                    aprovados++;
+                    break;
+                case REPROVADO:
+                    reprovados++;
+                    break;
+                case CONCLUIDO:
+                    concluidos++;
+                    break;
+                default:
+                    throw new IllegalStateException("Status de pedido desconhecido.");
+            }
+
+            LocalDateTime criacao = pedido.getDataCriacao();
+            if (!criacao.isBefore(desde) && !criacao.isAfter(referencia)) {
+                recentes++;
+                somaRecente = somaRecente.add(valor);
+            }
+        }
+
+        BigDecimal media = recentes == 0 ? BigDecimal.ZERO.setScale(2)
+                : somaRecente.divide(BigDecimal.valueOf(recentes), 2, RoundingMode.HALF_UP);
+        return new EstatisticasPedidos(pedidos.size(), abertos, aprovados, reprovados, concluidos,
+                inicio, referencia.toLocalDate(), recentes, media, maiorAberto);
     }
 
     private static PedidoAquisicao buscarPorId(List<PedidoAquisicao> pedidos, int id) {
